@@ -8,7 +8,6 @@ function calculateCredit(invoice, plays) {
   return volumeCredits
 }
 
-
 function calculateAmount(play, perf) {
   let thisAmount = 0;
   switch (play.type) {
@@ -40,20 +39,29 @@ function formatFunction() {
   return format;
 }
 
-function statement (invoice, plays) {
+function calculateTotalAmount(invoice, plays) {
   let totalAmount = 0;
-  let volumeCredits = 0;
+  for (let perf of invoice.performances) {
+    const play = plays[perf.playID];
+    totalAmount += calculateAmount(play, perf);
+  }
+  return totalAmount;
+}
+
+
+function statement (invoice, plays) {
+  // let totalAmount = 0;
+  let volumeCredits = calculateCredit(invoice, plays);
   let result = `Statement for ${invoice.customer}\n`;
   const format = formatFunction();
   for (let perf of invoice.performances) {
     const play = plays[perf.playID];
     let thisAmount = calculateAmount(play, perf);
-    totalAmount += calculateAmount(play, perf);
+    // totalAmount += calculateAmount(play, perf);
     result += ` ${play.name}: ${format(thisAmount / 100)} (${perf.audience} seats)\n`;
   }
-  volumeCredits = calculateCredit(invoice, plays);
 
-  result += `Amount owed is ${format(totalAmount / 100)}\n`;
+  result += `Amount owed is ${format(calculateTotalAmount(invoice, plays) / 100)}\n`;
   result += `You earned ${volumeCredits} credits \n`;
   return result;
 }
