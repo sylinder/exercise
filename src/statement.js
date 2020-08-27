@@ -31,12 +31,11 @@ function calculateAmount(play, perf) {
 }
 
 function formatFunction() {
-  const format = new Intl.NumberFormat('en-US', {
+  return new Intl.NumberFormat('en-US', {
     style: 'currency',
     currency: 'USD',
     minimumFractionDigits: 2,
   }).format;
-  return format;
 }
 
 function calculateTotalAmount(invoice, plays) {
@@ -48,22 +47,39 @@ function calculateTotalAmount(invoice, plays) {
   return totalAmount;
 }
 
-function renderText(invoice, plays) {
-  let volumeCredits = calculateCredit(invoice, plays);
-  let result = `Statement for ${invoice.customer}\n`;
-  const format = formatFunction();
+function generateData(invoice, plays) {
+  let data = {};
+  let items = [];
   for (let perf of invoice.performances) {
     const play = plays[perf.playID];
-    let thisAmount = calculateAmount(play, perf);
-    result += ` ${play.name}: ${format(thisAmount / 100)} (${perf.audience} seats)\n`;
+    let item = {
+      name: play.name,
+      amount: calculateAmount(play, perf),
+      audience: perf.audience,
+    }
+    items.push(item);
   }
-  result += `Amount owed is ${format(calculateTotalAmount(invoice, plays) / 100)}\n`;
+  data.items = items;
+  data.customer = invoice.customer;
+  data.totalAmount = calculateTotalAmount(invoice, plays);
+  data.volumeCredits = calculateCredit(invoice, plays);
+  return data;
+}
+
+function renderText(data) {
+  let volumeCredits = data.volumeCredits;
+  let result = `Statement for ${data.customer}\n`;
+  const format = formatFunction();
+  for (let item of data.items) {
+    result += ` ${item.name}: ${format( item.amount/ 100)} (${item.audience} seats)\n`;
+  }
+  result += `Amount owed is ${format(data.totalAmount / 100)}\n`;
   result += `You earned ${volumeCredits} credits \n`;
   return result;
 }
 
 function statement (invoice, plays) {
-  return renderText(invoice, plays);
+  return renderText(generateData(invoice, plays));
 }
 
 module.exports = {
