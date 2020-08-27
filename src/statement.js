@@ -67,14 +67,27 @@ function generateData(invoice, plays) {
 }
 
 function renderText(data) {
-  let volumeCredits = data.volumeCredits;
   let result = `Statement for ${data.customer}\n`;
   const format = formatFunction();
   for (let item of data.items) {
     result += ` ${item.name}: ${format( item.amount/ 100)} (${item.audience} seats)\n`;
   }
   result += `Amount owed is ${format(data.totalAmount / 100)}\n`;
-  result += `You earned ${volumeCredits} credits \n`;
+  result += `You earned ${data.volumeCredits} credits \n`;
+  return result;
+}
+
+function renderHtml(data) {
+  let result = `<h1>Statement for ${data.customer}</h1>\n` +
+      `<table>\n` +
+      `<tr><th>play</th><th>seats</th><th>cost</th></tr>`;
+  const format = formatFunction();
+  for (let item of data.items) {
+    result += ` <tr><td>${item.name}</td><td>${item.audience}</td><td>${format(item.amount/ 100)}</td></tr>\n`;
+  }
+  result += `</table>\n` +
+      `<p>Amount owed is <em>${format(data.totalAmount / 100)}</em></p>\n` +
+      `<p>You earned <em>${data.volumeCredits}</em> credits</p>\n`;
   return result;
 }
 
@@ -82,6 +95,11 @@ function statement (invoice, plays) {
   return renderText(generateData(invoice, plays));
 }
 
+function htmlStatement(invoice, plays) {
+  return renderHtml(generateData(invoice, plays));
+}
+
 module.exports = {
   statement,
+  htmlStatement,
 };
