@@ -7,7 +7,8 @@ function calculateCredit(volumeCredits, perf, play) {
   return volumeCredits;
 }
 
-function calculateAmount(play, thisAmount, perf) {
+function calculateAmount(play, perf) {
+  let thisAmount = 0;
   switch (play.type) {
     case 'tragedy':
       thisAmount = 40000;
@@ -39,9 +40,8 @@ function statement (invoice, plays) {
   }).format;
   for (let perf of invoice.performances) {
     const play = plays[perf.playID];
-    let thisAmount = 0;
-    thisAmount = calculateAmount(play, thisAmount, perf);
-    totalAmount += thisAmount;
+    let thisAmount = calculateAmount(play, perf);
+    totalAmount += calculateAmount(play, perf);
     volumeCredits = calculateCredit(volumeCredits, perf, play);
     result += ` ${play.name}: ${format(thisAmount / 100)} (${perf.audience} seats)\n`;
   }
